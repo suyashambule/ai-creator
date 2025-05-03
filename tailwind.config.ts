@@ -3,10 +3,10 @@ import type { Config } from "tailwindcss";
 const config: Config = {
   darkMode: ["class", '[data-theme="dark"]'],
   content: [
-    './pages/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    "./app/**/*.{ts,tsx}",
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
   ],
   theme: {
     container: {
@@ -16,9 +16,13 @@ const config: Config = {
         "2xl": "1400px",
       },
     },
-    extend: {},
+    extend: {
+      colors: {
+        primary: "#7C3AED",
+      },
+    },
   },
-  prefix: "",
+  plugins: [],
 };
 
-export default config; 
+export default config;

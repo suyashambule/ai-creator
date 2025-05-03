@@ -1,4 +1,4 @@
-const templatesList = [
+const Template = [
     {
         name:'Blog Title',
         desc:'An AI tool that generate blog title depends on yout blog information',
@@ -358,4 +358,4 @@ const templatesList = [
 
 ]
 
-export default templatesList;
+export default Template;
