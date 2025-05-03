@@ -1,9 +1,10 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { TEMPLATE, FORM } from "../../_components/TemplateListsection";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Loader2Icon } from "lucide-react";
 
 interface FormData {
   [key: string]: string;
@@ -12,14 +13,17 @@ interface FormData {
 interface PROPS {
   selectedTemplate?: TEMPLATE;
   userFormInput: (data: FormData) => void;
+  loading: boolean;
 }
 
-function FormSection({ selectedTemplate, userFormInput }: PROPS) {
+function FormSection({ selectedTemplate, userFormInput, loading }: PROPS) {
   const [formData, setFormData] = useState<FormData>({});
 
-  const handleonChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleonChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const Onsubmit = (e: React.FormEvent) => {
@@ -44,19 +48,24 @@ function FormSection({ selectedTemplate, userFormInput }: PROPS) {
           {selectedTemplate?.name}
         </h2>
         <p className="text-gray-700">{selectedTemplate?.desc}</p>
-      
-        <form className="mt-6 p-5 shadow-md border rounded-lg" onSubmit={Onsubmit}>
+
+        <form
+          className="mt-6 p-5 shadow-md border rounded-lg"
+          onSubmit={Onsubmit}
+        >
           {(selectedTemplate?.form ?? []).map((item: FORM, index: number) => (
             <div key={index} className="space-y-2 flex flex-col gap-2 mb-7">
-              <label className="font-bold" htmlFor={item.name}>{item.label}</label>
-              {item.field === 'input' ? (
+              <label className="font-bold" htmlFor={item.name}>
+                {item.label}
+              </label>
+              {item.field === "input" ? (
                 <Input
                   name={item.name}
                   required={item.required}
                   onChange={handleonChange}
                   value={formData[item.name] || ""}
                 />
-              ) : item.field === 'textarea' ? (
+              ) : item.field === "textarea" ? (
                 <Textarea
                   name={item.name}
                   required={item.required}
@@ -66,7 +75,13 @@ function FormSection({ selectedTemplate, userFormInput }: PROPS) {
               ) : null}
             </div>
           ))}
-          <Button type="submit" className="w-full bg-[#7C3AED] py-6">Generate</Button>
+          <Button
+            type="submit"
+            className="w-full bg-[#7C3AED] py-6"
+            disabled={loading}
+          >
+            {loading && <Loader2Icon className="animate-spin" />}Generate
+          </Button>
         </form>
       </div>
     </div>
