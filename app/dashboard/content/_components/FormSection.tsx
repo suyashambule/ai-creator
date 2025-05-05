@@ -31,6 +31,7 @@ function FormSection({ selectedTemplate, userFormInput, loading }: PROPS) {
     console.log("Submitted data:", formData);
     userFormInput(formData);
   };
+  
 
   return (
     <div>
