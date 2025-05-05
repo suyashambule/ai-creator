@@ -12,6 +12,7 @@ import { ChatSession } from "@google/generative-ai";
 import { db } from "@/utils/db";
 import { AIoutput } from "@/utils/schema";
 import { useUser } from "@clerk/nextjs";
+import { getCookie } from "cookies-next";
 
 interface FormData {
   [key: string]: string;
@@ -28,9 +29,16 @@ export default function Page() {
   const params = useParams();
   const templateSlug = params["template-slug"] as string;
   const selectedTemplate = Template.find((item) => item.slug === templateSlug);
+  const [isGuestMode, setIsGuestMode] = useState(false);
 
   const [aiResponse, setAIResponse] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  
+  useEffect(() => {
+    // Check for guest mode cookie on client side
+    const guestMode = getCookie('guestMode') === 'true';
+    setIsGuestMode(guestMode);
+  }, []);
 
   const GeneratedAIcontent = async (formData: FormData) => {
     if (!selectedTemplate) return;
@@ -44,7 +52,13 @@ export default function Page() {
       const text = await result.response.text();
       console.log(text);
       setAIResponse(text);
-      await SaveInDb(formData, selectedTemplate?.slug, text);
+      
+      // Only save to DB if not in guest mode
+      if (!isGuestMode) {
+        await SaveInDb(formData, selectedTemplate?.slug, text);
+      } else {
+        console.log("Guest mode active - content not saved to database");
+      }
     } catch (error) {
       console.error("AI generation failed:", error);
     } finally {
@@ -53,14 +67,18 @@ export default function Page() {
   };
 
   const SaveInDb=async(formData:any,slug:any,aiResp:string)=>{
-    const result =await db.insert(AIoutput).values({
-      formData: JSON.stringify(formData),
-      templateSlug: slug,
-      aiResponse: aiResp,
-      createdBy: user?.primaryEmailAddress?.emailAddress || 'anonymous@user.com',
-      createdAt: new Date()
-    })
-    console.log(result);
+    try {
+      const result = await db.insert(AIoutput).values({
+        formData: JSON.stringify(formData),
+        templateSlug: slug,
+        aiResponse: aiResp,
+        createdBy: user?.primaryEmailAddress?.emailAddress || 'anonymous@user.com',
+        createdAt: new Date()
+      });
+      console.log("Saved to database:", result);
+    } catch (error) {
+      console.error("Error saving to database:", error);
+    }
   }
 
   return (
@@ -73,6 +91,13 @@ export default function Page() {
           </Button>
         </Link>
       </div>
+      
+      {isGuestMode && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-sm">
+          You're in guest mode. Your generated content will not be saved.
+        </div>
+      )}
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 p-5">
         <FormSection
           selectedTemplate={selectedTemplate}
